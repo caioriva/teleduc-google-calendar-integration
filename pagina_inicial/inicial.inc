@@ -326,12 +326,12 @@ function CadastraUsuario($sock,$cod_usuario_global,$cod_curso)
 }
 
 /* *****************************************************************************
-  ReCadastraUsuario - Recadastra o usuário na tabela, alterando sua inscrição para
-                      não avaliada.
+  ReCadastraUsuario - Recadastra o usuï¿½rio na tabela, alterando sua inscriï¿½ï¿½o para
+                      nï¿½o avaliada.
   Entrada: $sock               - sock da base do Curso
-           $cod_usuario_global - código global do usuario, disponível no mmomento
+           $cod_usuario_global - cï¿½digo global do usuario, disponï¿½vel no mmomento
                                  em que ele se inscreve em um curso.
-           $cod_curso          - código do curso.
+           $cod_curso          - cï¿½digo do curso.
   Saida: nenhuma
 */
 function ReCadastraUsuario($sock,$cod_usuario_global,$cod_curso)
@@ -618,7 +618,7 @@ function RetornaTodosCursosUsuario($sock)
   $query .= "INNER JOIN Usuario_curso USUC on (USUC.cod_usuario_global = USU.cod_usuario) ";
   $query .= "INNER JOIN Cursos CUR on (CUR.cod_curso = USUC.cod_curso) ";
   $query .= "WHERE USU.cod_usuario = '".$_SESSION['cod_usuario_global_s']."'";// and ";
-  // Se o usuário tentou se incriver em um curso, mas sua inscrição foi cancelada, ele não possui vínculo com aquele curso.
+  // Se o usuï¿½rio tentou se incriver em um curso, mas sua inscriï¿½ï¿½o foi cancelada, ele nï¿½o possui vï¿½nculo com aquele curso.
   //$query .= "      USUC.tipo_usuario <> 'r'";
 
   $res = Enviar($sock, $query);
@@ -705,7 +705,7 @@ function StatusUsuarioNoCurso($sock, $cod_curso){
       /* 234 - Aluno desligado */
       return RetornaFraseDaLista($lista_frases,234);
     case "r":
-      /* 225 - Aluno não aceito */
+      /* 225 - Aluno nï¿½o aceito */
       return RetornaFraseDaLista($lista_frases,225);
     case "A":
       /* 226 - Aluno aceito */
@@ -1396,7 +1396,7 @@ function CadastrarLogar($form,$cod_curso,$tipo_curso)
   $_SESSION['cod_usuario_s'] = (!empty($cod_curso)) ? RetornaCodigoUsuarioCurso($sock, $_SESSION['cod_usuario_global_s'],$cod_curso) : "";
   $_SESSION['login_usuario_s'] = $login;
   //$_SESSION['tipo_usuario_s'] = "";
-  $_SESSION['cod_lingua_s'] = $cod_lingua; //??
+  //$_SESSION['cod_lingua_s'] = $cod_lingua; //??
   //$_SESSION['visitante_s'] = $cod_visitante_s; //??
   //$_SESSION['visao_formador_s'] = 1;
 
@@ -1691,4 +1691,77 @@ function CursoValido($sock, $cod_curso){
     return($curso_valido);
 }
 
+function autorizarGoogleCalendarPorCodigo($cod) {
+    $sock = Conectar('');
+    $cod_usuario = $_SESSION['cod_usuario_global_s'];
+
+    $dados_google_calendar = GoogleAPIProvider::getInstance()->getAccessTokenByAuthorizationCode($cod);
+
+    $access_token = $dados_google_calendar['access_token'];
+    $expiracao_access_token = time() + $dados_google_calendar['expires_in'];
+    $refresh_token = $dados_google_calendar['refresh_token'];
+
+    salvarConfiguracoesGoogleCalendarDeUsuario($sock, $cod_usuario, 'true', $access_token,
+        $expiracao_access_token, $refresh_token);
+
+    $_SESSION['google_calendar_ativado'] = true;
+
+    Desconectar($sock);
+    header('location: autorizar_google_calendar.php');
+}
+
+function autorizarGoogleCalendar() {
+    $sock = Conectar('');
+    $cod_usuario = $_SESSION['cod_usuario_global_s'];
+
+    $usuario_google_calendar = recuperarConfiguracoesGoogleCalendarDeUsuario($sock, $cod_usuario);
+
+    if($usuario_google_calendar == null) {
+        $url = GoogleAPIProvider::getInstance()->getGoogleCalendarURL();
+
+        Desconectar($sock);
+        header("location: $url");
+    } else {
+        if($usuario_google_calendar['google_calendar_ativado'] == false) {
+            marcarGoogleCalendarDeUsuario($sock, $cod_usuario, 'true');
+            $_SESSION['google_calendar_ativado'] = true;
+        }
+
+        Desconectar($sock);
+        header('location: autorizar_google_calendar.php');
+    }
+}
+
+function desautorizarGoogleCalendar() {
+    $sock = Conectar('');
+    $cod_usuario = $_SESSION['cod_usuario_global_s'];
+
+    $usuario_google_calendar = recuperarConfiguracoesGoogleCalendarDeUsuario($sock, $cod_usuario);
+
+    if($usuario_google_calendar != null) {
+        if($usuario_google_calendar['google_calendar_ativado'] == true) {
+            marcarGoogleCalendarDeUsuario($sock, $cod_usuario, 'false');
+            $_SESSION['google_calendar_ativado'] = false;
+        }
+    }
+
+    Desconectar($sock);
+    header('location: autorizar_google_calendar.php');
+}
+
+function salvarConfiguracoesGoogleCalendarDeUsuario($sock, $cod_usuario, $google_calendar_ativado,
+                                                    $access_token, $expiracao_access_token, $refresh_token) {
+    $query = "insert into usuario_google_calendar values ($cod_usuario, $google_calendar_ativado, '$access_token', $expiracao_access_token, '$refresh_token')";
+    Enviar($sock, $query);
+}
+
+function recuperarConfiguracoesGoogleCalendarDeUsuario($sock, $cod_usuario) {
+    $query = "select * from usuario_google_calendar where cod_usuario = $cod_usuario";
+    return RetornaLinha(Enviar($sock, $query));
+}
+
+function marcarGoogleCalendarDeUsuario($sock, $cod_usuario, $google_calendar_ativado) {
+    $query = "update usuario_google_calendar set google_calendar_ativado = $google_calendar_ativado where cod_usuario = $cod_usuario";
+    Enviar($sock, $query);
+}
 ?>

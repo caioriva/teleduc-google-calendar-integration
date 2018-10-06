@@ -51,8 +51,6 @@ $objAjax->configure("characterEncoding", 'ISO-8859-1');
 $objAjax->setFlag("decodeUTF8Input",true);
 $objAjax->configure('javascript URI', "../cursos/aplic/xajax_0.5");
 $objAjax->configure('errorHandler', true);
-//Registre os nomes das fun?es em PHP que voc?quer chamar atrav? do xajax
-$objAjax->register(XAJAX_FUNCTION,"AtualizaSenhaUsuarioDinamic");
 
 //Manda o xajax executar os pedidos acima.
 $objAjax->processRequest();
@@ -111,8 +109,8 @@ echo("              </td>\n");
 echo("            </tr>\n");
 echo("            <tr>\n");
 echo("              <td>\n");
-echo("                <form name=\"form_google_calendar\" id=\"form_google_calendar\" action=\"\" method=\"post\" onsubmit=\"\">\n");
-echo("                <table cellspacing=\"0\" class=\"tabInterna\">\n");
+echo("                <form name=\"form_google_calendar\" id=\"form_google_calendar\" action=\"validar_google_calendar.php\" method=\"post\" onsubmit=\"\">\n");
+echo("                  <table cellspacing=\"0\" class=\"tabInterna\">\n");
 echo("                    <tr class=\"head\">\n");
 echo("                      <td width=\"43%\">".RetornaFraseDaLista($lista_frases_configurar,533)."</td>\n");
 echo("                      <td width=\"14%\">&nbsp;</td>\n");
@@ -120,11 +118,15 @@ echo("                    </tr>\n");
 echo("                    <tr>\n");
 /* Google Calendar Autorizado */
 echo("                      <td valign='top' style='border:none; text-align:center;'>\n");
-echo("                        <input type='checkbox' class='input' name='google_calendar'>\n");
+if(isset($_SESSION['google_calendar_ativado']) && $_SESSION['google_calendar_ativado'] == true) {
+    echo("                    <input checked type='checkbox' class='input' name='google_calendar'>\n");
+} else {
+    echo("                    <input type='checkbox' class='input' name='google_calendar'>\n");
+}
 echo("                      </td>\n");
 echo("                      <td align=\"center\" >\n");
 echo("                        <ul>\n");
-echo("                          <li><input type='submit' class='input' value='".RetornaFraseDaLista($lista_frases_configurar,535)."' id='registar_alts' /></li>\n");
+echo("                          <li><input type='submit' class='input' value='".RetornaFraseDaLista($lista_frases_configurar,535)."' id='confirmar' /></li>\n");
 echo("                        </ul>\n");
 echo("                      </td>\n");
 echo("                    </tr>\n");

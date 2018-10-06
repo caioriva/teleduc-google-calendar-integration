@@ -38,5 +38,7 @@ CREATE TABLE usuario_google_calendar
 (
   cod_usuario INT(11),
   google_calendar_ativado BOOLEAN,
+  access_token VARCHAR(200),
+  expiracao_access_token INT (11),
   refresh_token VARCHAR(100)
 );

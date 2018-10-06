@@ -94,7 +94,12 @@
 
   $_SESSION['visitante_s'] 			= $cod_visitante_s;
   $_SESSION['visao_formador_s'] = 1;
-  
+
+  $usuario_google_calendar = recuperarConfiguracoesGoogleCalendarDeUsuario($sock, $cod_usuario);
+
+  if($usuario_google_calendar != null) {
+      $_SESSION['google_calendar_ativado'] = $usuario_google_calendar['google_calendar_ativado'];
+  }
   
   /* Se a autenticacao for para inscricao, manda para tela de inscricao */
   if($_POST['destino']=="inscricao") {
