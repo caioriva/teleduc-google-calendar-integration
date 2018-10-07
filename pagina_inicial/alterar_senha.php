@@ -180,6 +180,8 @@
   echo("                  <li><a href=\"alterar_senha.php\" id=\"alterar_senha\">".RetornaFraseDaLista($lista_frases_configurar, 2)."</a></li>\n");
   /* 3 - Alterar Idioma */
   echo("                  <li><a href=\"selecionar_lingua.php\" id=\"selecionar_idioma\">".RetornaFraseDaLista($lista_frases_configurar, 3)."</a></li>\n");
+  /* Autorizar Google Calendar */
+  echo("                  <li><a href=\"autorizar_google_calendar.php\" id=\"autorizar_google_calendar\">".RetornaFraseDaLista($lista_frases_configurar,534)."</a></li>\n");
   echo("                </ul>\n");
   echo("              </td>\n");
   echo("            </tr>\n");    
