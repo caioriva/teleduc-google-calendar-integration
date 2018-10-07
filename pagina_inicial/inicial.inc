@@ -1765,3 +1765,4 @@ function marcarGoogleCalendarDeUsuario($sock, $cod_usuario, $google_calendar_ati
     Enviar($sock, $query);
 }
 ?>
+
