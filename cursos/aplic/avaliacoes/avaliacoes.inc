@@ -2637,7 +2637,7 @@ function RetornaCodGrupoPortfolioAvaliacao($sock,$cod_aluno,$cod_avaliacao)
    RetornaExercicio - retorna o nome do modelo.
 
    Entradas: $sock - sock de conexao,
-             $cod_exercicio - código do exercicio.
+             $cod_exercicio - cï¿½digo do exercicio.
 
    Saida:    nome do frum,
 */
@@ -5043,7 +5043,7 @@ function RegistrarAvaliacaoDinamic($cod_curso, $cod_avaliacao, $cod_aluno_grupo,
   
   /* Feedback Ã© sempre bom nÃ©? */
   $cod_lingua = (int) $_SESSION['cod_lingua_s'];
-  /* #237 - A nota da avaliação de */
+  /* #237 - A nota da avaliaï¿½ï¿½o de */
   $texto1 = RetornaTexto($cod_lingua, 22, 237);
   /* #238 - foi alterada com sucesso */
   $texto2 = RetornaTexto($cod_lingua, 22, 238);
@@ -5140,13 +5140,13 @@ function RetornaCodResolucaoExercicio($sock, $cod_avaliacao, $cod_grupo){
    ExpulsaVisitante - verifica se o usuario eh visitante e impede seu
                     acesso se for
    entrada: $sock        - sock de conexao
-   $cod_curso   - código do curso atual.
-   $cod_usuario - código do usuário o qual pretende-se testar o
-                  acesso à ferramenta correio.
-   $eh_popup    - booleano que indica se a página que o chamou
-                  é ou não um popup. Se não for, devemos fechar
-                  as tags html do template comum de uma página
-                  de ferramenta (com rodapé, fechando o tabelão,
+   $cod_curso   - cï¿½digo do curso atual.
+   $cod_usuario - cï¿½digo do usuï¿½rio o qual pretende-se testar o
+                  acesso ï¿½ ferramenta correio.
+   $eh_popup    - booleano que indica se a pï¿½gina que o chamou
+                  ï¿½ ou nï¿½o um popup. Se nï¿½o for, devemos fechar
+                  as tags html do template comum de uma pï¿½gina
+                  de ferramenta (com rodapï¿½, fechando o tabelï¿½o,
                   etc).
    saida:   nenhuma
    OBS:     Para impedir o acesso, exibe tela com restricao de acesso e
@@ -5169,7 +5169,7 @@ function ExpulsaVisitante($sock, $cod_curso, $cod_usuario, $eh_popup = false) {
       echo("    <h3 style=\"margin-top:20px;\">".NomeCurso($sock,$cod_curso)."</h3>\n");
     }
 
-    /* 1 - Avaliações 504 - ï¿½rea restrita a alunos e formadores */
+    /* 1 - Avaliaï¿½ï¿½es 504 - ï¿½rea restrita a alunos e formadores */
     echo("          <h4>".RetornaFraseDaLista($lista_frases,1)." - ".RetornaFraseDaLista($lista_frases_geral,504)."</h4>\n");
 
     if (!$eh_popup) {
@@ -5215,6 +5215,67 @@ function ExpulsaVisitante($sock, $cod_curso, $cod_usuario, $eh_popup = false) {
     Desconectar($sock);
     exit();
   }
+}
+
+function integrarAvaliacaoGoogleCalendar($cod_avaliacao, $cod_curso, $titulo) {
+    $access_token = recuperarAccesToken($_SESSION['cod_usuario_global_s']);
+    $dados_avaliacao_google_calendar = criarDadosAvaliacaoGoogleCalendar($cod_curso, $cod_avaliacao, $titulo);
+}
+
+function recuperarAccesToken($cod_usuario) {
+    $consulta = "select access_token, expiracao_access_token, refresh_token from usuario_google_calendar where cod_usuario=$cod_usuario";
+    $sock = Conectar('');
+
+    $dados_google_calendar = RetornaLinha(Enviar($sock, $consulta));
+    $access_token = $dados_google_calendar['access_token'];
+    $expiracao_access_token = $dados_google_calendar['expiracao_access_token'];
+    $refresh_token = $dados_google_calendar['refresh_token'];
+
+    $dados = GoogleAPIProvider::getInstance()->getNewAccessTokenIfExpired($expiracao_access_token, $refresh_token);
+
+    if ($dados !== NULL) {
+        $expiracao_access_token = time() + $expiracao_access_token;
+        $access_token = $dados['access_token'];
+
+        $update = "update usuario_google_calendar set access_token='$access_token', expiracao_access_token=$expiracao_access_token where cod_usuario=$cod_usuario";
+        Enviar($sock, $update);
+    }
+
+    Desconectar($sock);
+    return $access_token;
+}
+
+function criarDadosAvaliacaoGoogleCalendar($cod_curso, $cod_avaliacao, $titulo_avaliacao) {
+    $dados_avaliacao = recuperarDadosAvaliacao($cod_curso, $cod_avaliacao);
+    $cod_usuario_criador = $dados_avaliacao['cod_usuario'];
+
+    $nomes = recuperarNomes($cod_curso, $cod_usuario_criador);
+    $nome_curso = $nomes['nome_curso'];
+    $nome_usuario_criador = $nomes['nome_usuario'];
+
+    $dados_avalicao_google_calendar['titulo'] = "AvaliaÃ§Ã£o '$titulo_avaliacao' do curso '$nome_curso'. Criada por: $nome_usuario_criador.";
+    $dados_avalicao_google_calendar['data_inicio'] = UnixTime2Data($dados_avaliacao['data_inicio']);
+    $dados_avalicao_google_calendar['data_termino'] = UnixTime2Data($dados_avaliacao['data_termino']);
+
+    return $dados_avalicao_google_calendar;
+}
+
+function recuperarDadosAvaliacao($cod_curso, $cod_avaliacao) {
+    $consulta = "select cod_usuario, data_inicio, data_termino from avaliacao where cod_avaliacao=$cod_avaliacao";
+    $sock = Conectar($cod_curso);
+    $dados_avaliacao = RetornaLinha(Enviar($sock, $consulta));
+    Desconectar($sock);
+
+    return $dados_avaliacao;
+}
+
+function recuperarNomes($cod_curso, $cod_usuario) {
+    $consulta = "select nome_curso, nome as nome_usuario from cursos as c, usuario_curso as uc, usuario as u where c.cod_curso=uc.cod_curso and uc.cod_usuario_global=u.cod_usuario and uc.cod_usuario=$cod_usuario and c.cod_curso=$cod_curso";
+    $sock = Conectar('');
+    $nomes = RetornaLinha(Enviar($sock, $consulta));
+    Desconectar($sock);
+
+    return $nomes;
 }
 
 ?>

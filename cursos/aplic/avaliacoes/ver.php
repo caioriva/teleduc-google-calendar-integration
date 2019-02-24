@@ -379,9 +379,11 @@
   echo (" startList();");
   echo (" }");
 
+  $titulo = RetornaTituloAvaliacao($sock, $dados_avaliacao['Ferramenta'], $dados_avaliacao['Cod_atividade']);
+
   echo("      function integrarAvaliacaoGoogleCalendar() {\n");
   echo("        if(confirm('" . RetornaFraseDaLista($lista_frases, 537) . "')) {\n");
-  echo("          window.location.replace('./integrar_avaliacao_ao_google_calendar.php?cod_curso=$cod_curso&cod_avaliacao=$cod_avaliacao&cod_usuario=$cod_usuario');\n");
+  echo("          window.location.replace('./integrar_avaliacao_ao_google_calendar.php?cod_curso=$cod_curso&cod_avaliacao=$cod_avaliacao&titulo=$titulo');\n");
   echo("        }\n");
   echo("      }\n\n");
  
@@ -489,9 +491,11 @@
     //Frase #1: Apagar
     echo("                 <li><span onClick=\"return(ExcluirAvaliacao());\">".RetornaFraseDaLista ($lista_frases_geral, 1)."</span></li>\n");
   }
-  // Integrar ao Google Calendar
-  echo("                   <li><span onclick=\"integrarAvaliacaoGoogleCalendar();\">" . RetornaFraseDaLista($lista_frases, 536) . "</span></li>");
-  echo("    </form>\n");
+  if(($dados_avaliacao['Ferramenta'] == 'P' || $dados_avaliacao['Ferramenta'] == 'N') && isset($_SESSION['google_calendar_ativado']) && $_SESSION['google_calendar_ativado'] == true) {
+      // Integrar ao Google Calendar
+      echo("                   <li><span onclick=\"integrarAvaliacaoGoogleCalendar();\">" . RetornaFraseDaLista($lista_frases, 536) . "</span></li>");
+  }
+echo("    </form>\n");
 
 if ($dados_avaliacao['Ferramenta'] == 'P')
   {
