@@ -5217,12 +5217,41 @@ function ExpulsaVisitante($sock, $cod_curso, $cod_usuario, $eh_popup = false) {
   }
 }
 
-function integrarAvaliacaoGoogleCalendar($cod_avaliacao, $cod_curso, $titulo) {
-    $access_token = recuperarAccesToken($_SESSION['cod_usuario_global_s']);
-    $dados_avaliacao_google_calendar = criarDadosAvaliacaoGoogleCalendar($cod_curso, $cod_avaliacao, $titulo);
+function integrarAvaliacaoGoogleCalendar($cod_avaliacao, $cod_curso, $cod_usuario, $titulo) {
+  try {
+      $access_token = recuperarAccessToken($_SESSION['cod_usuario_global_s']);
+      $dados_avaliacao_google_calendar = criarDadosAvaliacaoGoogleCalendar($cod_curso, $cod_avaliacao, $titulo);
+
+      $data_inicio = DateTime::createFromFormat("!d/m/Y", $dados_avaliacao_google_calendar['data_inicio']);
+      $data_termino = DateTime::createFromFormat("!d/m/Y", $dados_avaliacao_google_calendar['data_termino']);
+
+      $eventTime = ['startDate' => $data_inicio->format('Y-m-d'),
+      'endDate' => $data_termino->format('Y-m-d')];
+
+      $id_calendario = "primary";
+
+      $google_calendar_api = new GoogleCalendarAPI();
+
+      $id_evento = $google_calendar_api->createCalendarEvent(
+        $id_calendario, $dados_avaliacao_google_calendar['titulo'], TRUE,
+         $eventTime, NULL, $access_token);
+
+      salvarNovoEventoAvaliacaoGoogleCalendar($cod_curso, $cod_avaliacao, $cod_usuario,
+          $id_calendario, $id_evento, $dados_avaliacao_google_calendar['titulo']);
+  } catch(Exception $exception) {
+    echo 'Erro ao integrar avaliacao ao Google Calendar';
+    throw $exception;
+  }
 }
 
-function recuperarAccesToken($cod_usuario) {
+function salvarNovoEventoAvaliacaoGoogleCalendar($cod_curso, $cod_avaliacao, $cod_usuario, $id_calendario, $id_evento, $titulo_evento) {
+    $insert = "insert into avaliacao_evento_google_calendar (cod_avaliacao, cod_usuario, id_agenda, id_evento, titulo_evento) values ($cod_avaliacao, $cod_usuario, \"$id_calendario\", \"$id_evento\", \"$titulo_evento\")";
+    $sock = Conectar($cod_curso);
+    Enviar($sock, $insert);
+    Desconectar($sock);
+}
+
+function recuperarAccessToken($cod_usuario) {
     $consulta = "select access_token, expiracao_access_token, refresh_token from usuario_google_calendar where cod_usuario=$cod_usuario";
     $sock = Conectar('');
 
@@ -5234,7 +5263,7 @@ function recuperarAccesToken($cod_usuario) {
     $dados = GoogleAPIProvider::getInstance()->getNewAccessTokenIfExpired($expiracao_access_token, $refresh_token);
 
     if ($dados !== NULL) {
-        $expiracao_access_token = time() + $expiracao_access_token;
+        $expiracao_access_token = time() + $dados['expires_in'];
         $access_token = $dados['access_token'];
 
         $update = "update usuario_google_calendar set access_token='$access_token', expiracao_access_token=$expiracao_access_token where cod_usuario=$cod_usuario";
@@ -5253,7 +5282,7 @@ function criarDadosAvaliacaoGoogleCalendar($cod_curso, $cod_avaliacao, $titulo_a
     $nome_curso = $nomes['nome_curso'];
     $nome_usuario_criador = $nomes['nome_usuario'];
 
-    $dados_avalicao_google_calendar['titulo'] = "Avaliação '$titulo_avaliacao' do curso '$nome_curso'. Criada por: $nome_usuario_criador.";
+    $dados_avalicao_google_calendar['titulo'] = utf8_encode(utf8_decode("Avaliação") . " '$titulo_avaliacao' do curso '$nome_curso'. Criada por: $nome_usuario_criador.");
     $dados_avalicao_google_calendar['data_inicio'] = UnixTime2Data($dados_avaliacao['data_inicio']);
     $dados_avalicao_google_calendar['data_termino'] = UnixTime2Data($dados_avaliacao['data_termino']);
 

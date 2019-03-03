@@ -383,7 +383,7 @@
 
   echo("      function integrarAvaliacaoGoogleCalendar() {\n");
   echo("        if(confirm('" . RetornaFraseDaLista($lista_frases, 537) . "')) {\n");
-  echo("          window.location.replace('./integrar_avaliacao_ao_google_calendar.php?cod_curso=$cod_curso&cod_avaliacao=$cod_avaliacao&titulo=$titulo');\n");
+  echo("          window.location.replace('./integrar_avaliacao_ao_google_calendar.php?cod_curso=$cod_curso&cod_avaliacao=$cod_avaliacao&cod_usuario=$cod_usuario&titulo=$titulo');\n");
   echo("        }\n");
   echo("      }\n\n");
  
