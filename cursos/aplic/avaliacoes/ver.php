@@ -62,7 +62,7 @@
   $objAjax->register(XAJAX_FUNCTION,"AbreEdicao");
   $objAjax->register(XAJAX_FUNCTION,"AcabaEdicaoDinamic");
   $objAjax->register(XAJAX_FUNCTION,"AlertaFraseFerramenta");
-  // Registra funções para uso de menu_principal.php
+  // Registra funï¿½ï¿½es para uso de menu_principal.php
   $objAjax->register(XAJAX_FUNCTION,"DeslogaUsuarioCursoDinamic");
   // Manda o xajax executar os pedidos acima.
   $objAjax->processRequest();
@@ -81,7 +81,7 @@
 
   $feedbackObject =  new FeedbackObject($lista_frases);
   //adicionar as acoes possiveis, 1o parametro Ã© a aÃ§Ã£o, o segundo Ã© o nÃºmero da frase para ser impressa se for "true", o terceiro caso "false"
-  /* Frase #212 - Avaliação criada com sucesso */
+  /* Frase #212 - Avaliaï¿½ï¿½o criada com sucesso */
   $feedbackObject->addAction("criarAvaliacao", 212, 0);
   /* Frase #235 - Exercicio aplicado com sucesso */
   $feedbackObject->addAction("aplicar", RetornaFraseDaLista($lista_frases, 235), 0);
@@ -104,10 +104,10 @@
   echo("      var cod_avaliacao='".$cod_avaliacao."';\n");
   echo("      var tela_avaliacao='".$tela_avaliacao."';\n");
   /* (ger) 18 - Ok */
-  // Texto do botão Ok do ckEditor
+  // Texto do botï¿½o Ok do ckEditor
   echo("    var textoOk = '".RetornaFraseDaLista($lista_frases_geral, 18)."';\n\n");
   /* (ger) 2 - Cancelar */
-  // Texto do botão Cancelar do ckEditor
+  // Texto do botï¿½o Cancelar do ckEditor
   echo("    var textoCancelar = '".RetornaFraseDaLista($lista_frases_geral, 2)."';\n\n");
 
   echo("      function startList() {\n");
@@ -188,8 +188,8 @@
       echo("          document.frmAvaliacao.acao.value= 'excluirAvaliacao';\n");
       echo("          document.frmAvaliacao.submit();\n");
       echo("        }\n");
-      echo("      }\n\n");
 
+      echo("      }\n\n");
     }
 
     echo("      function AvaliarParticipantes()\n");
@@ -349,7 +349,7 @@
   echo("			  	xajax_EditarTitulo(".$cod_curso.", conteudo, ".$cod_usuario.", '".$dados_avaliacao['Ferramenta']."', ".$dados_avaliacao['Cod_atividade'].", ".$cod_avaliacao.");\n");
   echo("			  }\n");
   echo("		}else{\n");
-  echo("			/* frase #229 - O campo n‹o pode ser vazio. */\n");
+  echo("			/* frase #229 - O campo nï¿½o pode ser vazio. */\n");
   echo("			if ((valor=='ok')&&(document.getElementById(tag+'_'+id+'_text').value==\"\"))\n");
   echo("				xajax_AlertaFraseFerramenta(229,22);\n");
 
@@ -378,6 +378,25 @@
       $feedbackObject->returnFeedback($_GET['acao'], $_GET['atualizacao']);
   echo (" startList();");
   echo (" }");
+
+  $cod_ferr = $dados_avaliacao['Ferramenta'];
+  $cod_atividade = $dados_avaliacao['Cod_atividade'];
+
+  $dados_avaliacao_evento = recuperarDadosAvaliacaoEventoGoogleCalendar($sock, $cod_avaliacao, $cod_usuario);
+  $id_agenda=$dados_avaliacao_evento['id_agenda'];
+  $id_evento=$dados_avaliacao_evento['id_evento'];
+
+  echo("      function integrarAvaliacaoGoogleCalendar() {\n");
+  echo("        if('$dados_avaliacao_evento') {\n");
+echo("            if(confirm('" . RetornaFraseDaLista($lista_frases, 538) . "')) {\n");
+echo("              window.location.replace('./atualizar_avaliacao_google_calendar.php?cod_ferramenta=$cod_ferr&cod_atividade=$cod_atividade&cod_curso=$cod_curso&cod_avaliacao=$cod_avaliacao&cod_usuario=$cod_usuario&id_agenda=$id_agenda&id_evento=$id_evento');\n");
+echo("            }\n");
+  echo("        } else {\n");
+  echo("          if(confirm('" . RetornaFraseDaLista($lista_frases, 537) . "')) {\n");
+  echo("            window.location.replace('./integrar_avaliacao_ao_google_calendar.php?cod_ferramenta=$cod_ferr&cod_atividade=$cod_atividade&cod_curso=$cod_curso&cod_avaliacao=$cod_avaliacao&cod_usuario=$cod_usuario');\n");
+  echo("          }\n");
+  echo("        }\n");
+  echo("      }\n\n");
  
   echo("    </script>\n");
 
@@ -412,16 +431,16 @@
   if ($linha['status'] == "E")
   {
     if (
-      // Se a edição anterior foi iniciada a mais de meia hora atrás ou...
+      // Se a ediï¿½ï¿½o anterior foi iniciada a mais de meia hora atrï¿½s ou...
       ($linha['inicio_edicao']<(time()-1800)) ||
-      // Se o usuário que solicita ver a avaliação é o mesmo que começou a edição.
+      // Se o usuï¿½rio que solicita ver a avaliaï¿½ï¿½o ï¿½ o mesmo que comeï¿½ou a ediï¿½ï¿½o.
       ($cod_usuario == $linha['cod_usuario'])
     ){
-      // Cancelar a edição atual em favor da (provável) nova edição do usuario
-      // que solicitou a página.
+      // Cancelar a ediï¿½ï¿½o atual em favor da (provï¿½vel) nova ediï¿½ï¿½o do usuario
+      // que solicitou a pï¿½gina.
       CancelaEdicaoAvaliacao($sock, "Avaliacao", $cod_avaliacao, $cod_usuario);
     }else{
-      // Mostrar ao usuário que esta avaliação ainda está em edição.
+      // Mostrar ao usuï¿½rio que esta avaliaï¿½ï¿½o ainda estï¿½ em ediï¿½ï¿½o.
       echo("          <script language=\"javascript\">\n");
       echo("            window.open('em_edicao.php?cod_curso=".$cod_curso."&cod_avaliacao=".$cod_avaliacao."&origem=ver','EmEdicao','width=400,height=250,top=150,left=250,status=yes,toolbar=no,menubar=no,resizable=yes');\n");
       echo("            window.location='avaliacoes.php?cod_curso=".$cod_curso."&cod_usuario=".$cod_usuario."&cod_ferramenta=22&cod_avaliacao=".$cod_avaliacao."&tela_avaliacao=".$tela_avaliacao."&operacao=".$cod_operacao."';\n");
@@ -483,9 +502,13 @@
     //Frase #1: Apagar
     echo("                 <li><span onClick=\"return(ExcluirAvaliacao());\">".RetornaFraseDaLista ($lista_frases_geral, 1)."</span></li>\n");
   }
-  echo("    </form>\n");
+  if(($dados_avaliacao['Ferramenta'] == 'P' || $dados_avaliacao['Ferramenta'] == 'N') && isset($_SESSION['google_calendar_ativado']) && $_SESSION['google_calendar_ativado'] == true) {
+      // Integrar ao Google Calendar
+      echo("                   <li><span onclick=\"integrarAvaliacaoGoogleCalendar();\">" . RetornaFraseDaLista($lista_frases, 536) . "</span></li>");
+  }
+echo("    </form>\n");
 
-  if ($dados_avaliacao['Ferramenta'] == 'P')
+if ($dados_avaliacao['Ferramenta'] == 'P')
   {
     // 14 - Atividade no Portfï¿½lio
     echo("                  <li><span onclick=\"window.location='../material/material.php?cod_curso=".$cod_curso."&cod_usuario=".$cod_usuario."&cod_ferramenta=3'\">".RetornaFraseDaLista($lista_frases, 227)."</span></li>\n");

@@ -32,16 +32,16 @@ class GoogleCalendarAPI {
         return $data['value'];
     }
 
-    public function createCalendarEvent($calendarId, $summary, $isFullDayEvent, $eventTime, $eventTimezone, $accessToken) {
+    public function createCalendarEvent($calendarId, $summary, $isDateEvent, $eventTime, $eventTimezone, $accessToken) {
 
         $eventsURL = 'https://www.googleapis.com/calendar/v3/calendars/' . $calendarId . '/events';
 
         $curlPost = array('summary' => $summary);
 
-        if ($isFullDayEvent == TRUE) {
+        if ($isDateEvent == TRUE) {
 
-            $curlPost['start'] = array('date' => $eventTime['eventDate']);
-            $curlPost['end'] = array('date' => $eventTime['eventDate']);
+            $curlPost['start'] = array('date' => $eventTime['startDate']);
+            $curlPost['end'] = array('date' => $eventTime['endDate']);
         } else {
             $curlPost['start'] = array('dateTime' => $eventTime['startTime'], 'timeZone' => $eventTimezone);
             $curlPost['end'] = array('dateTime' => $eventTime['endTime'], 'timeZone' => $eventTimezone);
@@ -108,15 +108,15 @@ class GoogleCalendarAPI {
         }
     }
     
-    public function updateCalendarEvent($eventId, $calendarId, $summary, $isFullDayEvent, $eventTime, $eventTimezone, $accessToken) {
+    public function updateCalendarEvent($eventId, $calendarId, $summary, $isDateEvent, $eventTime, $eventTimezone, $accessToken) {
 		
                 $eventsURL = 'https://www.googleapis.com/calendar/v3/calendars/' . $calendarId . '/events/' . $eventId;
 
 		$curlPost = array('summary' => $summary);
                 
-		if($isFullDayEvent == TRUE) {
-			$curlPost['start'] = array('date' => $eventTime['eventDate']);
-			$curlPost['end'] = array('date' => $eventTime['eventDate']);
+		if($isDateEvent == TRUE) {
+			$curlPost['start'] = array('date' => $eventTime['startDate']);
+			$curlPost['end'] = array('date' => $eventTime['endDate']);
 		}
 		else {
 			$curlPost['start'] = array('dateTime' => $eventTime['startTime'], 'timeZone' => $eventTimezone);

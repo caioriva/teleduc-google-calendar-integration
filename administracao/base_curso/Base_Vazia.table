@@ -1424,3 +1424,17 @@ CREATE TABLE IF NOT EXISTS `Exercicios_topico` (
   `topico` varchar(20) NOT NULL,
   PRIMARY KEY  (`cod_topico`)
 ) ENGINE=MyISAM  DEFAULT CHARSET=latin1;
+
+#  # # # # # # # # # # # # # # # # # # # # # # # # # # # #
+
+#
+#  Table structure for table `avaliacao_evento_google_calendar`
+#
+
+CREATE TABLE IF NOT EXISTS `avaliacao_evento_google_calendar` (
+  `cod_avaliacao` int(11) NOT NULL,
+  `cod_usuario` int(11) NOT NULL,
+  `id_agenda` VARCHAR(100),
+  `id_evento` VARCHAR(100),
+  `titulo_evento` VARCHAR(50)
+) ENGINE=MyISAM DEFAULT CHARSET=latin1;
