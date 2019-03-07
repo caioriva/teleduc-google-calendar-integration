@@ -47,16 +47,28 @@ INSERT INTO `lingua_textos` (`cod_texto`, `cod_lingua`, `cod_ferramenta`, `texto
 VALUES (536, 4, 22, 'Integrar ao Google Agenda');
 
 INSERT INTO `lingua_textos` (`cod_texto`, `cod_lingua`, `cod_ferramenta`, `texto`)
-VALUES (537, 1, 22, 'Essa avaliação e seus dados salvos serão integrados ao Google Agenda dos usuários associados a mesma. Confirma?');
+VALUES (537, 1, 22, 'Essa avaliação e seus dados salvos serão integrados ao Google Agenda. Confirma?');
 
 INSERT INTO `lingua_textos` (`cod_texto`, `cod_lingua`, `cod_ferramenta`, `texto`)
-VALUES (537, 2, 22, 'Esta evaluación y sus datos guardados se integrarán a Google Calendar de los usuarios associados a ella. Confirmar?');
+VALUES (537, 2, 22, 'Esta evaluación y sus datos guardados se integrarán a Google Calendar. Confirmar?');
 
 INSERT INTO `lingua_textos` (`cod_texto`, `cod_lingua`, `cod_ferramenta`, `texto`)
-VALUES (537, 3, 22, 'This evaluation and it`s saved data will be integrated into the Google Calendar the users associated with it. Do you confirm?');
+VALUES (537, 3, 22, 'This evaluation and it`s saved data will be integrated into Google Calendar. Do you confirm?');
 
 INSERT INTO `lingua_textos` (`cod_texto`, `cod_lingua`, `cod_ferramenta`, `texto`)
-VALUES (537, 4, 22, 'Essa avaliação e seus dados salvos serão integrados ao Google Agenda dos usuários associados a mesma. Confirma?');
+VALUES (537, 4, 22, 'Essa avaliação e seus dados salvos serão integrados ao Google Agenda. Confirma?');
+
+INSERT INTO `lingua_textos` (`cod_texto`, `cod_lingua`, `cod_ferramenta`, `texto`)
+VALUES (538, 1, 22, 'Essa avaliação e seus dados salvos já estão integrados ao Google Agenda. Deseja atualizá-la?');
+
+INSERT INTO `lingua_textos` (`cod_texto`, `cod_lingua`, `cod_ferramenta`, `texto`)
+VALUES (538, 2, 22, 'Esta evaluación y sus datos guardados ya están integrados en Google Calendar. ¿Desea actualizarla?');
+
+INSERT INTO `lingua_textos` (`cod_texto`, `cod_lingua`, `cod_ferramenta`, `texto`)
+VALUES (538, 3, 22, 'This evaluation and its saved data are already integrated with Google Calendar. Do you want to update it?');
+
+INSERT INTO `lingua_textos` (`cod_texto`, `cod_lingua`, `cod_ferramenta`, `texto`)
+VALUES (538, 4, 22, 'Essa avaliação e seus dados salvos já estão integrados ao Google Agenda. Deseja atualizá-la?');
 
 CREATE TABLE usuario_google_calendar
 (

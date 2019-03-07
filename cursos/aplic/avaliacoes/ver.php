@@ -379,11 +379,22 @@
   echo (" startList();");
   echo (" }");
 
-  $titulo = RetornaTituloAvaliacao($sock, $dados_avaliacao['Ferramenta'], $dados_avaliacao['Cod_atividade']);
+  $cod_ferr = $dados_avaliacao['Ferramenta'];
+  $cod_atividade = $dados_avaliacao['Cod_atividade'];
+
+  $dados_avaliacao_evento = recuperarDadosAvaliacaoEventoGoogleCalendar($sock, $cod_avaliacao, $cod_usuario);
+  $id_agenda=$dados_avaliacao_evento['id_agenda'];
+  $id_evento=$dados_avaliacao_evento['id_evento'];
 
   echo("      function integrarAvaliacaoGoogleCalendar() {\n");
-  echo("        if(confirm('" . RetornaFraseDaLista($lista_frases, 537) . "')) {\n");
-  echo("          window.location.replace('./integrar_avaliacao_ao_google_calendar.php?cod_curso=$cod_curso&cod_avaliacao=$cod_avaliacao&cod_usuario=$cod_usuario&titulo=$titulo');\n");
+  echo("        if('$dados_avaliacao_evento') {\n");
+echo("            if(confirm('" . RetornaFraseDaLista($lista_frases, 538) . "')) {\n");
+echo("              window.location.replace('./atualizar_avaliacao_google_calendar.php?cod_ferramenta=$cod_ferr&cod_atividade=$cod_atividade&cod_curso=$cod_curso&cod_avaliacao=$cod_avaliacao&cod_usuario=$cod_usuario&id_agenda=$id_agenda&id_evento=$id_evento');\n");
+echo("            }\n");
+  echo("        } else {\n");
+  echo("          if(confirm('" . RetornaFraseDaLista($lista_frases, 537) . "')) {\n");
+  echo("            window.location.replace('./integrar_avaliacao_ao_google_calendar.php?cod_ferramenta=$cod_ferr&cod_atividade=$cod_atividade&cod_curso=$cod_curso&cod_avaliacao=$cod_avaliacao&cod_usuario=$cod_usuario');\n");
+  echo("          }\n");
   echo("        }\n");
   echo("      }\n\n");
  

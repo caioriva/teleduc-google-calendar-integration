@@ -5224,6 +5224,8 @@ function integrarAvaliacaoGoogleCalendar($cod_avaliacao, $cod_curso, $cod_usuari
 
       $data_inicio = DateTime::createFromFormat("!d/m/Y", $dados_avaliacao_google_calendar['data_inicio']);
       $data_termino = DateTime::createFromFormat("!d/m/Y", $dados_avaliacao_google_calendar['data_termino']);
+      $data_termino->add(new DateInterval('P1D'));
+
 
       $eventTime = ['startDate' => $data_inicio->format('Y-m-d'),
       'endDate' => $data_termino->format('Y-m-d')];
@@ -5244,10 +5246,43 @@ function integrarAvaliacaoGoogleCalendar($cod_avaliacao, $cod_curso, $cod_usuari
   }
 }
 
+function atualizarAvaliacaoGoogleCalendar($cod_avaliacao, $cod_curso, $cod_usuario, $titulo, $id_agenda, $id_evento) {
+  try {
+      $access_token = recuperarAccessToken($_SESSION['cod_usuario_global_s']);
+      $dados_avaliacao_google_calendar = criarDadosAvaliacaoGoogleCalendar($cod_curso, $cod_avaliacao, $titulo);
+
+      $data_inicio = DateTime::createFromFormat("!d/m/Y", $dados_avaliacao_google_calendar['data_inicio']);
+      $data_termino = DateTime::createFromFormat("!d/m/Y", $dados_avaliacao_google_calendar['data_termino']);
+      $data_termino->add(new DateInterval('P1D'));
+
+      $eventTime = ['startDate' => $data_inicio->format('Y-m-d'),
+          'endDate' => $data_termino->format('Y-m-d')];
+
+      $google_calendar_api = new GoogleCalendarAPI();
+
+      $google_calendar_api->updateCalendarEvent(
+          $id_evento, $id_agenda, $dados_avaliacao_google_calendar['titulo'], TRUE,
+          $eventTime, NULL, $access_token);
+
+      atualizarEventoAvaliacaoGoogleCalendar($cod_curso, $cod_avaliacao, $cod_usuario,
+          $id_agenda, $id_evento, $dados_avaliacao_google_calendar['titulo']);
+  } catch(Exception $exception) {
+      echo 'Erro ao atualizar avaliacao no Google Calendar';
+      throw $exception;
+  }
+}
+
 function salvarNovoEventoAvaliacaoGoogleCalendar($cod_curso, $cod_avaliacao, $cod_usuario, $id_calendario, $id_evento, $titulo_evento) {
     $insert = "insert into avaliacao_evento_google_calendar (cod_avaliacao, cod_usuario, id_agenda, id_evento, titulo_evento) values ($cod_avaliacao, $cod_usuario, \"$id_calendario\", \"$id_evento\", \"$titulo_evento\")";
     $sock = Conectar($cod_curso);
     Enviar($sock, $insert);
+    Desconectar($sock);
+}
+
+function atualizarEventoAvaliacaoGoogleCalendar($cod_curso, $cod_avaliacao, $cod_usuario, $titulo_evento) {
+  $update = "update avaliacao_evento_google_calendar set titulo_evento = \"$titulo_evento\" where cod_avaliacao=$cod_avaliacao and cod_usuario=$cod_usuario";
+    $sock = Conectar($cod_curso);
+    Enviar($sock, $update);
     Desconectar($sock);
 }
 
@@ -5305,6 +5340,13 @@ function recuperarNomes($cod_curso, $cod_usuario) {
     Desconectar($sock);
 
     return $nomes;
+}
+
+function recuperarDadosAvaliacaoEventoGoogleCalendar($sock, $cod_avaliacao, $cod_usuario) {
+    $sql = "select id_agenda, id_evento from avaliacao_evento_google_calendar where cod_avaliacao=$cod_avaliacao and cod_usuario=$cod_usuario";
+    $avaliacao_evento = RetornaLinha(Enviar($sock, $sql));
+
+    return $avaliacao_evento;
 }
 
 ?>
