@@ -5,6 +5,7 @@ class GoogleCalendarAPI {
     const GET_TIMEZONE_ERROR = "Error : Failed to get user's timezone";
     const CREATE_EVENT_ERROR = 'Error : Failed to create event';
     const GET_CALENDARS_LIST_ERROR = 'Error : Failed to get calendars list';
+    const GET_EVENT_ERROR = 'Error: failed to get event';
     const DELETE_EVENT_ERROR = 'Error : Failed to delete event';
     const UPDATE_EVENT_ERROR = 'Error : Failed to update event';
 
@@ -63,6 +64,31 @@ class GoogleCalendarAPI {
         }
 
         return $data['id'];
+    }
+
+    public function getEvent($calendarId, $eventId, $accessToken) {
+
+        $calendarsURL = "https://www.googleapis.com/calendar/v3/calendars/$calendarId/events/$eventId";
+
+        $ch = curl_init();
+        curl_setopt($ch, CURLOPT_URL, $calendarsURL);
+        curl_setopt($ch, CURLOPT_RETURNTRANSFER, TRUE);
+        curl_setopt($ch, CURLOPT_HTTPHEADER, array('Authorization: Bearer ' . $accessToken));
+        curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, FALSE);
+        $data = json_decode(curl_exec($ch), TRUE);
+        $httpCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
+
+        if ($httpCode !== 200) {
+            if ($httpCode == 404) {
+                $data = false;
+            } else {
+                throw new Exception(self::GET_EVENT_ERROR);
+            }
+        } else if($data['status'] == 'cancelled') {
+            $data = false;
+        }
+
+        return $data;
     }
 
     public function getCalendarsList($accessToken) {
