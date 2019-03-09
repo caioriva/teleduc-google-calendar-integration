@@ -1,4 +1,8 @@
 <?php
+$googleCalendar  = '../../../googlecalendar/googlecalendarapi/';
+
+include_once($googleCalendar.'settings/GoogleAPIProvider.php');
+include_once($googleCalendar.'calendar/GoogleCalendarAPI.php');
 /*
 <!--
 -------------------------------------------------------------------------------
@@ -1692,23 +1696,54 @@ function ApagaAvaliacao($sock, $cod_avaliacao,$cod_usuario)
             $cod_avaliacao - cdigo da avaliacao.
    Saida:    true se bem-sucedido, do contr�io, false.
 */
-function ExcluiAvaliacao($sock, $cod_avaliacao,$cod_usuario)
+function ExcluiAvaliacao($sock, $cod_avaliacao,$cod_usuario, $cod_curso)
 {
-  $query = "select ferramenta from Avaliacao where cod_avaliacao=".$cod_avaliacao;
-  $res = Enviar($sock, $query);
-  $linha = RetornaLinha($res);
+    $query = "select ferramenta from Avaliacao where cod_avaliacao=".$cod_avaliacao;
+    $res = Enviar($sock, $query);
+    $linha = RetornaLinha($res);
 
-  if (!strcmp($linha[0],"E"))
-  {
-    $query = "update  Exercicios_aplicado set avaliacao=null where avaliacao=".$cod_avaliacao;
-    $res1 = Enviar($sock, $query);
-  }
+    if (!strcmp($linha[0],"E"))
+    {
+        $query = "update  Exercicios_aplicado set avaliacao=null where avaliacao=".$cod_avaliacao;
+        $res1 = Enviar($sock, $query);
+    }
 
-  $query = "update Avaliacao set status = 'X' where cod_avaliacao= ".$cod_avaliacao;
-  $res = Enviar($sock, $query);
-  $consulta="insert into Avaliacao_historicos values (".$cod_avaliacao.", ".$cod_usuario.", ".time().", 'X')";
-  $res=Enviar($sock,$consulta);
-  return($res);
+    $query = "update Avaliacao set status = 'X' where cod_avaliacao= ".$cod_avaliacao;
+    $res = Enviar($sock, $query);
+    $consulta="insert into Avaliacao_historicos values (".$cod_avaliacao.", ".$cod_usuario.", ".time().", 'X')";
+    $res=Enviar($sock,$consulta);
+
+    if($res) {
+        removerEventosGoogleCalendar($cod_avaliacao, $cod_curso);
+    }
+
+    return ($res);
+}
+
+function removerEventosGoogleCalendar($cod_avalicao, $cod_curso) {
+    $delete_eventos = "delete from avaliacao_evento_google_calendar where cod_avaliacao = $cod_avalicao";
+    $query_eventos = "select cod_usuario, id_agenda, id_evento from avaliacao_evento_google_calendar where cod_avaliacao = $cod_avalicao";
+    $query_usuario_geral = "select cod_usuario_global from usuario_curso where cod_curso = $cod_curso and cod_usuario = ";
+    $google_calendar_api = new GoogleCalendarAPI();
+
+    $sock_curso = Conectar($cod_curso);
+    $dados_eventos = RetornaArrayLinhas(Enviar($sock_curso, $query_eventos));
+    Desconectar($sock_curso);
+
+    $sock_geral = Conectar('');
+    foreach ($dados_eventos as $dado_evento) {
+        $dado_usuario = RetornaLinha(Enviar($sock_geral, $query_usuario_geral . $dado_evento['cod_usuario']));
+        $access_token = recuperarAccessToken($dado_usuario['cod_usuario_global']);
+
+        if($google_calendar_api->getEvent($dado_evento['id_agenda'], $dado_evento['id_evento'], $access_token)) {
+            $google_calendar_api->deleteCalendarEvent($dado_evento['id_evento'], $dado_evento['id_agenda'], $access_token);
+        }
+    }
+    Desconectar($sock_geral);
+
+    $sock_curso = Conectar($cod_curso);
+    Enviar($sock_curso, $delete_eventos);
+    Desconectar($sock_curso);
 }
 
 /* *********************************************************************
@@ -5260,12 +5295,18 @@ function atualizarAvaliacaoGoogleCalendar($cod_avaliacao, $cod_curso, $cod_usuar
 
       $google_calendar_api = new GoogleCalendarAPI();
 
-      $google_calendar_api->updateCalendarEvent(
-          $id_evento, $id_agenda, $dados_avaliacao_google_calendar['titulo'], TRUE,
-          $eventTime, NULL, $access_token);
+      if($google_calendar_api->getEvent($id_agenda, $id_evento, $access_token)) {
+          $google_calendar_api->updateCalendarEvent(
+              $id_evento, $id_agenda, $dados_avaliacao_google_calendar['titulo'], TRUE,
+              $eventTime, NULL, $access_token);
+      } else {
+          $id_evento = $google_calendar_api->createCalendarEvent(
+              $id_agenda, $dados_avaliacao_google_calendar['titulo'], TRUE,
+              $eventTime, NULL, $access_token);
+      }
 
       atualizarEventoAvaliacaoGoogleCalendar($cod_curso, $cod_avaliacao, $cod_usuario,
-          $id_agenda, $id_evento, $dados_avaliacao_google_calendar['titulo']);
+          $dados_avaliacao_google_calendar['titulo'], $id_evento);
   } catch(Exception $exception) {
       echo 'Erro ao atualizar avaliacao no Google Calendar';
       throw $exception;
@@ -5279,8 +5320,8 @@ function salvarNovoEventoAvaliacaoGoogleCalendar($cod_curso, $cod_avaliacao, $co
     Desconectar($sock);
 }
 
-function atualizarEventoAvaliacaoGoogleCalendar($cod_curso, $cod_avaliacao, $cod_usuario, $titulo_evento) {
-  $update = "update avaliacao_evento_google_calendar set titulo_evento = \"$titulo_evento\" where cod_avaliacao=$cod_avaliacao and cod_usuario=$cod_usuario";
+function atualizarEventoAvaliacaoGoogleCalendar($cod_curso, $cod_avaliacao, $cod_usuario, $titulo_evento, $id_evento) {
+  $update = "update avaliacao_evento_google_calendar set titulo_evento = \"$titulo_evento\", id_evento = \"$id_evento\" where cod_avaliacao=$cod_avaliacao and cod_usuario=$cod_usuario";
     $sock = Conectar($cod_curso);
     Enviar($sock, $update);
     Desconectar($sock);

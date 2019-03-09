@@ -58,18 +58,6 @@ VALUES (537, 3, 22, 'This evaluation and it`s saved data will be integrated into
 INSERT INTO `lingua_textos` (`cod_texto`, `cod_lingua`, `cod_ferramenta`, `texto`)
 VALUES (537, 4, 22, 'Essa avaliação e seus dados salvos serão integrados ao Google Agenda. Confirma?');
 
-INSERT INTO `lingua_textos` (`cod_texto`, `cod_lingua`, `cod_ferramenta`, `texto`)
-VALUES (538, 1, 22, 'Essa avaliação e seus dados salvos já estão integrados ao Google Agenda. Deseja atualizá-la?');
-
-INSERT INTO `lingua_textos` (`cod_texto`, `cod_lingua`, `cod_ferramenta`, `texto`)
-VALUES (538, 2, 22, 'Esta evaluación y sus datos guardados ya están integrados en Google Calendar. ¿Desea actualizarla?');
-
-INSERT INTO `lingua_textos` (`cod_texto`, `cod_lingua`, `cod_ferramenta`, `texto`)
-VALUES (538, 3, 22, 'This evaluation and its saved data are already integrated with Google Calendar. Do you want to update it?');
-
-INSERT INTO `lingua_textos` (`cod_texto`, `cod_lingua`, `cod_ferramenta`, `texto`)
-VALUES (538, 4, 22, 'Essa avaliação e seus dados salvos já estão integrados ao Google Agenda. Deseja atualizá-la?');
-
 CREATE TABLE usuario_google_calendar
 (
   cod_usuario INT(11),

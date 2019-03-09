@@ -86,7 +86,7 @@ if ($acao == "criarAvaliacaoExt") {
   // acao da pagina "ver.php"
   if($acao == "excluirAvaliacao")
   {
-    if (!ExcluiAvaliacao($sock, $cod_avaliacao,$cod_usuario))
+      if (!ExcluiAvaliacao($sock, $cod_avaliacao,$cod_usuario, $cod_curso))
     {
       /* 83 - Erro ao se excluir a avalia��o. */
       Desconectar($sock);
@@ -95,7 +95,7 @@ if ($acao == "criarAvaliacaoExt") {
     else
     {
       Desconectar($sock);
-      header("Location:avaliacoes.php?cod_curso=".$cod_curso."&cod_usuario=".$cod_usuario."&cod_ferramenta=22&tela_avaliacao=".$tela_avaliacao."&acao=excluirAvaliacao&atualizacao=true"); 
+      header("Location:avaliacoes.php?cod_curso=".$cod_curso."&cod_usuario=".$cod_usuario."&cod_ferramenta=22&tela_avaliacao=".$tela_avaliacao."&acao=excluirAvaliacao&atualizacao=true");
     }
   }
 
